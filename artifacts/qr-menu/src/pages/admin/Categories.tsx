@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
-  Body,
   TableCell,
   TableHead,
   TableHeader,
@@ -83,7 +82,6 @@ export default function Categories() {
 
     if (editingId) {
       updateMutation.mutate({
-        restaurantId,
         id: editingId,
         data,
       }, {
@@ -109,7 +107,7 @@ export default function Categories() {
 
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this category?")) {
-      deleteMutation.mutate({ restaurantId, id }, {
+      deleteMutation.mutate({ id }, {
         onSuccess: () => {
           toast({ title: "Category deleted" });
           queryClient.invalidateQueries({ queryKey: getListCategoriesQueryKey(restaurantId) });

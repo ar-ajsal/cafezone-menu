@@ -92,7 +92,6 @@ export default function Offers() {
 
     if (editingId) {
       updateMutation.mutate({
-        restaurantId,
         id: editingId,
         data,
       }, {
@@ -118,7 +117,7 @@ export default function Offers() {
 
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this offer?")) {
-      deleteMutation.mutate({ restaurantId, id }, {
+      deleteMutation.mutate({ id }, {
         onSuccess: () => {
           toast({ title: "Offer deleted" });
           queryClient.invalidateQueries({ queryKey: getListOffersQueryKey(restaurantId) });

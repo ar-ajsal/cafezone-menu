@@ -73,12 +73,16 @@ export default function Items() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data: items, isLoading: itemsLoading } = useListItems(restaurantId, {
-    query: {
-      queryKey: getListItemsQueryKey(restaurantId, { search: search || undefined }),
-      enabled: !!restaurantId,
+  const { data: items, isLoading: itemsLoading } = useListItems(
+    restaurantId, 
+    { search: search || undefined },
+    {
+      query: {
+        queryKey: getListItemsQueryKey(restaurantId, { search: search || undefined }),
+        enabled: !!restaurantId,
+      }
     }
-  }, { search: search || undefined });
+  );
 
   const { data: categories } = useListCategories(restaurantId, {
     query: {
@@ -119,7 +123,6 @@ export default function Items() {
 
     if (editingId) {
       updateMutation.mutate({
-        restaurantId,
         id: editingId,
         data,
       }, {
@@ -145,7 +148,7 @@ export default function Items() {
 
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this menu item?")) {
-      deleteMutation.mutate({ restaurantId, id }, {
+      deleteMutation.mutate({ id }, {
         onSuccess: () => {
           toast({ title: "Item deleted" });
           queryClient.invalidateQueries({ queryKey: getListItemsQueryKey(restaurantId, { search: search || undefined }) });
