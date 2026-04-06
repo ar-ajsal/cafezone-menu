@@ -1,0 +1,742 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: QR Digital Menu API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: restaurants
+    description: Restaurant management
+  - name: categories
+    description: Menu categories
+  - name: items
+    description: Menu items
+  - name: offers
+    description: Special offers
+  - name: qr
+    description: QR code generation
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /restaurants:
+    get:
+      operationId: listRestaurants
+      tags: [restaurants]
+      summary: List all restaurants
+      responses:
+        "200":
+          description: List of restaurants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Restaurant"
+    post:
+      operationId: createRestaurant
+      tags: [restaurants]
+      summary: Create a restaurant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRestaurantInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+
+  /restaurants/{id}:
+    get:
+      operationId: getRestaurant
+      tags: [restaurants]
+      summary: Get a restaurant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Restaurant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+    put:
+      operationId: updateRestaurant
+      tags: [restaurants]
+      summary: Update a restaurant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRestaurantInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+    delete:
+      operationId: deleteRestaurant
+      tags: [restaurants]
+      summary: Delete a restaurant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /restaurants/{restaurantId}/menu:
+    get:
+      operationId: getRestaurantMenu
+      tags: [restaurants]
+      summary: Get full menu for a restaurant (public)
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Full menu with categories and items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMenu"
+
+  /restaurants/{restaurantId}/categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List categories for a restaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a category
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    put:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /restaurants/{restaurantId}/items:
+    get:
+      operationId: listItems
+      tags: [items]
+      summary: List menu items for a restaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [veg, non-veg, beverage]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItem"
+    post:
+      operationId: createItem
+      tags: [items]
+      summary: Create a menu item
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+
+  /items/{id}:
+    put:
+      operationId: updateItem
+      tags: [items]
+      summary: Update a menu item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuItemInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+    delete:
+      operationId: deleteItem
+      tags: [items]
+      summary: Delete a menu item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /restaurants/{restaurantId}/offers:
+    get:
+      operationId: listOffers
+      tags: [offers]
+      summary: List offers for a restaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Offer"
+    post:
+      operationId: createOffer
+      tags: [offers]
+      summary: Create an offer
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+
+  /offers/{id}:
+    put:
+      operationId: updateOffer
+      tags: [offers]
+      summary: Update an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+    delete:
+      operationId: deleteOffer
+      tags: [offers]
+      summary: Delete an offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /restaurants/{restaurantId}/qr:
+    get:
+      operationId: getQrCode
+      tags: [qr]
+      summary: Get QR code data for restaurant menu
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: QR code info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QrCodeData"
+
+  /restaurants/{restaurantId}/stats:
+    get:
+      operationId: getRestaurantStats
+      tags: [restaurants]
+      summary: Get stats summary for admin dashboard
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        primaryColor:
+          type: string
+          nullable: true
+        slug:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - slug
+        - createdAt
+
+    CreateRestaurantInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        primaryColor:
+          type: string
+          nullable: true
+        slug:
+          type: string
+      required:
+        - name
+        - slug
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        restaurantId:
+          type: integer
+        name:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+      required:
+        - id
+        - restaurantId
+        - name
+        - sortOrder
+
+    CreateCategoryInput:
+      type: object
+      properties:
+        name:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+      required:
+        - name
+        - sortOrder
+
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        restaurantId:
+          type: integer
+        categoryId:
+          type: integer
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        imageUrl:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [veg, non-veg, beverage]
+        isCombo:
+          type: boolean
+        comboItemCount:
+          type: integer
+          nullable: true
+        isSpicy:
+          type: boolean
+        isAvailable:
+          type: boolean
+        sortOrder:
+          type: integer
+        categoryName:
+          type: string
+          nullable: true
+      required:
+        - id
+        - restaurantId
+        - name
+        - price
+        - type
+        - isCombo
+        - isSpicy
+        - isAvailable
+        - sortOrder
+
+    CreateMenuItemInput:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        imageUrl:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [veg, non-veg, beverage]
+        isCombo:
+          type: boolean
+        comboItemCount:
+          type: integer
+          nullable: true
+        isSpicy:
+          type: boolean
+        isAvailable:
+          type: boolean
+        sortOrder:
+          type: integer
+      required:
+        - name
+        - price
+        - type
+        - isCombo
+        - isSpicy
+        - isAvailable
+        - sortOrder
+
+    Offer:
+      type: object
+      properties:
+        id:
+          type: integer
+        restaurantId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        discountPercent:
+          type: number
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+      required:
+        - id
+        - restaurantId
+        - title
+        - isActive
+
+    CreateOfferInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        discountPercent:
+          type: number
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+      required:
+        - title
+        - isActive
+
+    FullMenu:
+      type: object
+      properties:
+        restaurant:
+          $ref: "#/components/schemas/Restaurant"
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MenuItem"
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Offer"
+      required:
+        - restaurant
+        - categories
+        - items
+        - offers
+
+    QrCodeData:
+      type: object
+      properties:
+        url:
+          type: string
+        restaurantId:
+          type: integer
+        restaurantName:
+          type: string
+      required:
+        - url
+        - restaurantId
+        - restaurantName
+
+    RestaurantStats:
+      type: object
+      properties:
+        totalCategories:
+          type: integer
+        totalItems:
+          type: integer
+        totalOffers:
+          type: integer
+        vegCount:
+          type: integer
+        nonVegCount:
+          type: integer
+        beverageCount:
+          type: integer
+        comboCount:
+          type: integer
+      required:
+        - totalCategories
+        - totalItems
+        - totalOffers
+        - vegCount
+        - nonVegCount
+        - beverageCount
+        - comboCount
