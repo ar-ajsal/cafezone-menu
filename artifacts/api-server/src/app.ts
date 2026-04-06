@@ -5,11 +5,14 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { connectDB } from "./lib/db";
+import { syncCounters } from "./lib/models";
 
 const app: Express = express();
 
 // Connect to MongoDB (non-fatal if unreachable — routes will 500 gracefully)
-connectDB().catch(err => {
+connectDB().then(() => {
+  return syncCounters();
+}).catch(err => {
   logger.warn({ err: err?.message }, "MongoDB connection failed — server starting without DB");
 });
 

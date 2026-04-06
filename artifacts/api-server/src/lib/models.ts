@@ -13,6 +13,26 @@ export async function getNextId(name: string): Promise<number> {
   return doc.seq;
 }
 
+export async function syncCounters(): Promise<void> {
+  // Wait to avoid import order issues with the models below
+  const collections = [
+    { model: mongoose.models.Restaurant, name: "restaurant" },
+    { model: mongoose.models.Category, name: "category" },
+    { model: mongoose.models.MenuItem, name: "menuItem" },
+    { model: mongoose.models.Offer, name: "offer" }
+  ];
+
+  for (const { model, name } of collections) {
+    if (!model) continue;
+    const highest = await model.findOne().sort({ id: -1 }).select("id").lean();
+    const maxId = highest?.id || 0;
+    await Counter.findByIdAndUpdate(name, { $set: { seq: maxId } }, { upsert: true });
+    console.log(`[DB] Synced counter '${name}' to ${maxId}`);
+  }
+}
+
+
+
 /* ── Restaurant ──────────────────────────────────────────────── */
 export interface IRestaurant extends Document {
   id: number;
