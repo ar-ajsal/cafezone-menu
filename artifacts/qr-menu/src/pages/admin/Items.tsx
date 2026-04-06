@@ -130,6 +130,9 @@ export default function Items() {
           toast({ title: "Item updated" });
           queryClient.invalidateQueries({ queryKey: getListItemsQueryKey(restaurantId, { search: search || undefined }) });
           closeDialog();
+        },
+        onError: (err: any) => {
+          toast({ title: "Error updating item", description: err.message || "Unknown error", variant: "destructive" });
         }
       });
     } else {
@@ -141,9 +144,21 @@ export default function Items() {
           toast({ title: "Item created" });
           queryClient.invalidateQueries({ queryKey: getListItemsQueryKey(restaurantId, { search: search || undefined }) });
           closeDialog();
+        },
+        onError: (err: any) => {
+          toast({ title: "Error creating item", description: err.message || "Unknown error", variant: "destructive" });
         }
       });
     }
+  };
+
+  const onFormError = (errors: any) => {
+    console.error("Form validation errors:", errors);
+    toast({ 
+      title: "Validation Error", 
+      description: "Please check the form for missing or invalid fields.", 
+      variant: "destructive" 
+    });
   };
 
   const handleDelete = (id: number) => {
@@ -314,7 +329,7 @@ export default function Items() {
               <DialogTitle>{editingId ? "Edit Item" : "Add Menu Item"}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+              <form onSubmit={form.handleSubmit(onSubmit, onFormError)} className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
