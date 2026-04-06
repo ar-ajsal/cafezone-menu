@@ -1,4 +1,5 @@
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import { useState } from "react";
 
 interface CartSheetProps {
   isOpen: boolean;
@@ -10,6 +11,8 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ isOpen, onClose, cart, menuItems, onIncrement, onDecrement }: CartSheetProps) {
+  const [address, setAddress] = useState("");
+
   if (!isOpen) return null;
 
   const cartEntries = Object.entries(cart)
@@ -85,11 +88,28 @@ export function CartSheet({ isOpen, onClose, cart, menuItems, onIncrement, onDec
 
         {/* Footer Checkout Area */}
         {cartTotalItems > 0 && (
-          <div className="p-5 border-t border-gray-100 bg-gray-50 rounded-b-3xl shrink-0">
+          <div className="p-5 border-t border-gray-100 bg-gray-50 rounded-b-3xl shrink-0 space-y-4">
+            <div>
+              <label htmlFor="address" className="block text-[13px] font-bold text-gray-700 mb-1.5 flex justify-between">
+                <span>Table No. / Address</span>
+                <span className="text-gray-400 font-normal">Optional</span>
+              </label>
+              <textarea 
+                id="address"
+                rows={2}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="E.g., Table 4 or Door No."
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[14px] bg-white outline-none focus:ring-2 focus:ring-[#22c55e]/20 focus:border-[#22c55e] transition-all resize-none"
+              />
+            </div>
             <button 
               onClick={() => {
                 const orderText = cartEntries.map(({ item, qty }) => `${qty}x ${item.name}`).join('\n');
-                const message = `*New Order:*\n\n${orderText}`;
+                let message = `*New Order:*\n\n${orderText}`;
+                if (address.trim()) {
+                  message += `\n\n*Deliver to:*\n${address.trim()}`;
+                }
                 const whatsappUrl = `https://wa.me/919746214344?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
               }}
