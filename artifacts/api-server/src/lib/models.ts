@@ -24,7 +24,7 @@ export async function syncCounters(): Promise<void> {
 
   for (const { model, name } of collections) {
     if (!model) continue;
-    const highest = await model.findOne().sort({ id: -1 }).select("id").lean();
+    const highest: any = await model.findOne().sort({ id: -1 }).select("id").lean();
     const maxId = highest?.id || 0;
     await Counter.findByIdAndUpdate(name, { $set: { seq: maxId } }, { upsert: true });
     console.log(`[DB] Synced counter '${name}' to ${maxId}`);
